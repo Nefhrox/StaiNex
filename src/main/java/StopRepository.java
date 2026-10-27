@@ -38,4 +38,28 @@ public class StopRepository
 
         return stops;
     }
+
+    // add new stop to DB
+    public static int add_stop(Connection connection, Stop stop) throws SQLException
+    {
+        // dont allow null stop
+        if (stop == null)
+        {
+            throw new IllegalArgumentException("Stop must not be null");
+        }
+
+        // command for DB
+        String sql = "INSERT INTO stops (id, name) VALUES (?, ?)";
+
+        // connect to DB and execute SQL command through existing connection
+        try (PreparedStatement statement = connection.prepareStatement(sql))
+        {
+            // for stop first value is id and second is name
+            statement.setString(1, stop.id());
+            statement.setString(2, stop.name());
+
+            // dont create routes yet
+            return statement.executeUpdate();
+        }
+    }
 }
