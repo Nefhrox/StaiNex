@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class StopRepository 
 {
@@ -39,6 +40,8 @@ public class StopRepository
         return stops;
     }
 
+
+
     // add new stop to DB
     public static int add_stop(Connection connection, Stop stop) throws SQLException
     {
@@ -62,4 +65,45 @@ public class StopRepository
             return statement.executeUpdate();
         }
     }
+
+
+
+    // find stop by its ID
+    public static Optional<Stop> find_by_id(Connection connection, String stop_id) throws SQLException
+    {
+        // dont allow nullable or empty ID
+        if (stop_id == null || stop_id.isBlank())
+        {
+            throw new IllegalArgumentException("Stop ID must not be blank");
+        }
+
+        // sql command
+        String sql = "SELECT id, name FROM stops WHERE id = ?";
+
+        // prepare sql command for existing connection
+        try (PreparedStatement statement = connection.prepareStatement(sql))
+        {
+            // bind request stop ID to the query
+            statement.setString(1, stop_id);
+
+            // execute search
+            try (ResultSet result_set = statement.executeQuery())
+            {
+                if (result_set.next())
+                {
+                    // reading needed stop and creating stop object
+                    Stop stop = new Stop(
+                        result_set.getString("id"),
+                        result_set.getString("name")
+                    );
+
+                    // return found stop
+                    return Optional.of(stop);
+                }
+
+                // return empty object if no stop is found
+                return Optional.empty();
+            }
+        }
+    }   
 }
