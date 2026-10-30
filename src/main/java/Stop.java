@@ -2,7 +2,7 @@ public record Stop(String id, String name)
 {
     public Stop 
     {
-        // function must have actual id and name
+        // reject null, empty or whitespace-only id and name
 
         if (id == null || id.isBlank()) 
         {

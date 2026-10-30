@@ -1,7 +1,7 @@
 {
   "version": 1,
   "enabled": true,
-  "level": "standard",
+  "level": "thorough",
   "distance": "mixed",
   "mode": "block",
   "events": [
