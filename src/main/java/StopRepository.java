@@ -8,18 +8,18 @@ import java.util.Optional;
 
 public class StopRepository 
 {
-    // get stops list from method find_all that connects to DB 
+    // read all stops ordered by id using the existing connection
     public static List<Stop> find_all(Connection connection) throws SQLException 
     {
         // list for stops that program gets from DB
         List<Stop> stops = new ArrayList<>();
 
-        // future SQL command
+        // SQL query for all stops ordered by id
         String sql = "SELECT id, name FROM stops ORDER BY id";
 
         try 
         (
-            // object that connects to DB
+            // prepare the query using the existing connection
             PreparedStatement statement = connection.prepareStatement(sql);
             // SQL command execution
             ResultSet result_set = statement.executeQuery()
@@ -54,14 +54,14 @@ public class StopRepository
         // command for DB
         String sql = "INSERT INTO stops (id, name) VALUES (?, ?)";
 
-        // connect to DB and execute SQL command through existing connection
+        // prepare the insert using the existing connection
         try (PreparedStatement statement = connection.prepareStatement(sql))
         {
-            // for stop first value is id and second is name
+            // bind the stop id and name to the first and second SQL parameters
             statement.setString(1, stop.id());
             statement.setString(2, stop.name());
 
-            // dont create routes yet
+            // execute the insert and return the number of affected rows
             return statement.executeUpdate();
         }
     }
@@ -71,7 +71,7 @@ public class StopRepository
     // find stop by its ID
     public static Optional<Stop> find_by_id(Connection connection, String stop_id) throws SQLException
     {
-        // dont allow nullable or empty ID
+        // reject null, empty or whitespace-only stop id
         if (stop_id == null || stop_id.isBlank())
         {
             throw new IllegalArgumentException("Stop ID must not be blank");
@@ -97,11 +97,11 @@ public class StopRepository
                         result_set.getString("name")
                     );
 
-                    // return found stop
+                    // return an Optional containing the found stop
                     return Optional.of(stop);
                 }
 
-                // return empty object if no stop is found
+                // return an empty Optional if no stop is found
                 return Optional.empty();
             }
         }

@@ -7,12 +7,12 @@ public class Database
     // open connection to DB 
     public static Connection open_connection() throws SQLException
     {
-        // get connection details from .env file
+        // read connection settings from environment variables
         String db_url = System.getenv("STAINEX_DB_URL");
         String db_user = System.getenv("STAINEX_DB_USER");
         String db_password = System.getenv("STAINEX_DB_PASSWORD");
 
-        // allow only full access
+        // reject missing connection settings
         if (db_url == null || db_user == null || db_password == null)
         {
             throw new IllegalStateException("Database environment variables are not set");
