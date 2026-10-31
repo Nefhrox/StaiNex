@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.OptionalInt;
 
 public class StopCounter 
 {
@@ -37,5 +38,32 @@ public class StopCounter
         }
 
         return count_remaining_stops(current_index, target_index);
+    }
+
+    // method to fing stop position in list of stops
+    public static OptionalInt find_stop_index(List<Stop> route_stops, String stop_id)
+    {
+        // reject null and blank 
+        if (route_stops == null)
+        {
+            throw new IllegalArgumentException("Route stops must not be null");
+        }
+
+        if (stop_id == null || stop_id.isBlank())
+        {
+            throw new IllegalArgumentException("Stop ID must not be blank");
+        }
+
+        // find position of ID in list
+        for (int stop_index = 0; stop_index < route_stops.size(); stop_index++)
+        {
+            if (route_stops.get(stop_index).id().equals(stop_id))
+            {
+                return OptionalInt.of(stop_index);
+            }
+        }
+
+        // if nothing found return empty object
+        return OptionalInt.empty();
     }
 }
