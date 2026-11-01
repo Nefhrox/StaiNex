@@ -1,15 +1,14 @@
+import java.util.List;
+
 public class TripNotifier
 {
     // check if we should notify user
-    public static boolean should_notify(int remaining_stops)
+    public static boolean should_notify(List<Stop> route_stops, int current_index, int target_index)
     {
-        // reject negative number of stops
-        if (remaining_stops < 0)
-        {
-            throw new IllegalArgumentException("Remaining stops must be non-negative");
-        }
+        // count remaining stops
+        int remaining_stops = StopCounter.count_remaining_stops(route_stops, current_index, target_index);
 
-        // remind user if there are 1 or 2 stops before target stop
+        // check if we should remind user if there are 1 or 2 stops before target stop
         return remaining_stops >= 1 && remaining_stops <= 2;
     }
 }
