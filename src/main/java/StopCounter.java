@@ -58,7 +58,7 @@ public class StopCounter
             }
         }
 
-        // if nothing found return empty object
+        // if nothing found return empty OptionalInt
         return OptionalInt.empty();
     }
 }
