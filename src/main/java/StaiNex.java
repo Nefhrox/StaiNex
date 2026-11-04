@@ -15,9 +15,9 @@ public class StaiNex
         );
 
         // validate launch arguments
-        if (args.length > 2 || (args.length >= 1 && args[0].isBlank()) || (args.length == 2 && !args[1].equals("1") && !args[1].equals("2")))
+        if (args.length > 3 || (args.length >= 1 && args[0].isBlank()) || (args.length >= 2 && !args[1].equals("1") && !args[1].equals("2")) || (args.length == 3 && args[2].isBlank()))
         {
-            System.out.println("Usage: java -cp target/classes StaiNex [target_stop_id] [notify_before_stops: 1 or 2]");
+            System.out.println("Usage: java -cp target/classes StaiNex [target_stop_id] [notify_before_stops: 1 or 2] [start_stop_id]");
             return;
         }
 
@@ -47,19 +47,43 @@ public class StaiNex
         int notify_before_stops = 2;
 
         // read how many stops before the destination to start notifying
-        if (args.length == 2)
+        if (args.length >= 2)
         {
             notify_before_stops = Integer.parseInt(args[1]);
         }
 
-        // simulate moving from the first stop to the destination
-        for (int current_index = 0; current_index <= target_index; current_index++)
+        int start_index = 0;
+
+        // try to find starting stop
+        if (args.length == 3)
+        {
+            OptionalInt start_position = StopCounter.find_stop_index(route_stops, args[2]);
+
+            if (start_position.isEmpty())
+            {
+                System.out.println("Starting stop not found in the route: " + args[2]);
+                return;
+            }
+
+            // if argument is in the route get its index
+            start_index = start_position.getAsInt();
+        }
+
+        // dont allow destination behind starting stop
+        if (start_index > target_index)
+        {
+            System.out.println("Target stop is behind the starting stop.");
+            return;
+        }
+
+        // simulate moving from the selected starting stop to the destination
+        for (int current_index = start_index; current_index <= target_index; current_index++)
         {
             // display the current stop name
             System.out.println("Current station: " + route_stops.get(current_index).name());
             int remaining_stops = StopCounter.count_remaining_stops(route_stops, current_index, target_index);
 
-            // report arrival at the destination or warn when it is 1 or 2 stops away
+            // report arrival or warn within the configured notification range
             if (current_index == target_index)
             {
                 System.out.println("You arrived to target station");
