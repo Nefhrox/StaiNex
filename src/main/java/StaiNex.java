@@ -5,14 +5,19 @@ public class StaiNex
 {
     public static void main(String[] args)
     {
-        // test stops in route order
-        List<Stop> route_stops = List.of(
-            new Stop("stop-1", "station"),
-            new Stop("stop-2", "square"),
-            new Stop("stop-3", "center"),
-            new Stop("stop-4", "park"),
-            new Stop("stop-5", "university")
+        // test route
+        Route route = new Route(
+            "demo-outbound",
+            "Demo outbound route",
+            List.of(
+                new Stop("stop-1", "station"),
+                new Stop("stop-2", "square"),
+                new Stop("stop-3", "center"),
+                new Stop("stop-4", "park"),
+                new Stop("stop-5", "university")
+            )
         );
+        List<Stop> route_stops = route.stops();
 
         // validate launch arguments
         if (args.length > 3 || (args.length >= 1 && args[0].isBlank()) || (args.length >= 2 && !args[1].equals("1") && !args[1].equals("2")) || (args.length == 3 && args[2].isBlank()))
