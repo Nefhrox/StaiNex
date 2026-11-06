@@ -17,6 +17,8 @@ public class StaiNex
                 new Stop("stop-5", "university")
             )
         );
+
+        // list of test stops
         List<Stop> route_stops = route.stops();
 
         // validate launch arguments
@@ -36,7 +38,7 @@ public class StaiNex
         }
 
         // find index of target stop in route
-        OptionalInt target_position = StopCounter.find_stop_index(route_stops, target_stop_id);
+        OptionalInt target_position = route.find_stop_index(target_stop_id);
 
         // if route doesnt have target stop
         if (target_position.isEmpty())
@@ -62,7 +64,7 @@ public class StaiNex
         // try to find starting stop
         if (args.length == 3)
         {
-            OptionalInt start_position = StopCounter.find_stop_index(route_stops, args[2]);
+            OptionalInt start_position = route.find_stop_index(args[2]);
 
             if (start_position.isEmpty())
             {
