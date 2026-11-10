@@ -1,6 +1,9 @@
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RouteRepository
 {
@@ -63,5 +66,44 @@ public class RouteRepository
             // execute insert and return number of added rows
             return statement.executeUpdate();
         }
+    }
+
+    // add stops from DB to program
+    public static List<Stop> find_route_stops(Connection connection, String route_id) throws SQLException
+    {
+        // validate route id
+        if (route_id == null || route_id.isBlank())
+        {
+            throw new IllegalArgumentException("Route ID must not be blank");
+        }
+
+        List<Stop> stops = new ArrayList<>();
+
+        // get stop IDs and names for selected route in stop index order
+        String sql = "SELECT stops.id, stops.name FROM route_stops "
+            + "JOIN stops ON stops.id = route_stops.stop_id "
+            + "WHERE route_stops.route_id = ? ORDER BY route_stops.stop_index";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql))
+        {
+            // search route ID by first SQL argument
+            statement.setString(1, route_id);
+
+            try (ResultSet result_set = statement.executeQuery())
+            {
+                while (result_set.next())
+                {
+                    Stop stop = new Stop(
+                        result_set.getString("id"),
+                        result_set.getString("name")
+                    );
+
+                    // store found stop in list
+                    stops.add(stop);
+                }
+            }
+        }
+
+        return stops;
     }
 }
