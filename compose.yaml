@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: stainex
+      POSTGRES_USER: stainex
+      POSTGRES_PASSWORD: ${STAINEX_DB_PASSWORD:?Set STAINEX_DB_PASSWORD before starting the database}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "stainex", "-d", "stainex"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  postgres_data:
