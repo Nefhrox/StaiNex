@@ -80,7 +80,7 @@ public class RouteRepository
         List<Stop> stops = new ArrayList<>();
 
         // get stop IDs and names for selected route in stop index order
-        String sql = "SELECT stops.id, stops.name FROM route_stops "
+        String sql = "SELECT stops.id, stops.name, route_stops.stop_index FROM route_stops "
             + "JOIN stops ON stops.id = route_stops.stop_id "
             + "WHERE route_stops.route_id = ? ORDER BY route_stops.stop_index";
 
@@ -93,6 +93,16 @@ public class RouteRepository
             {
                 while (result_set.next())
                 {
+                    int stop_index = result_set.getInt("stop_index");
+
+                    // index has to match the number of stops that we already read
+                    // any gaps means route indexes are broken
+
+                    if (stop_index != stops.size())
+                    {
+                        throw new IllegalStateException("Route " + route_id + " has a gap in stop indexes: expected " + stops.size() + " but found " + stop_index);
+                    }
+
                     Stop stop = new Stop(
                         result_set.getString("id"),
                         result_set.getString("name")
