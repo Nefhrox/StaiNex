@@ -68,6 +68,67 @@ public class RouteRepository
         }
     }
 
+    // save full route with all stops in one transaction
+    public static void save_route(Connection connection, Route route) throws SQLException
+    {
+        if (route == null)
+        {
+            throw new IllegalArgumentException("Route must not be null");
+        }
+
+        // store auto_commit mode
+        boolean auto_commit = connection.getAutoCommit();
+
+        // run all changes in one transaction
+        connection.setAutoCommit(false);
+
+        try
+        {
+            String sql = "INSERT INTO stops (id, name) VALUES (?, ?) ON CONFLICT (id) DO NOTHING";
+
+            // insert stop data but if a conflict happens skip operation
+            try (PreparedStatement statement = connection.prepareStatement(sql))
+            {
+                for (Stop stop : route.stops())
+                {
+                    statement.setString(1, stop.id());
+                    statement.setString(2, stop.name());
+                    statement.executeUpdate();
+                }
+            }
+
+            // add route to DB
+            add_route_info(connection, route);
+
+            // link all stops to route in index order
+            for (int stop_index = 0; stop_index < route.stops().size(); stop_index++)
+            {
+                add_route_stop(
+                    connection,
+                    route.id(),
+                    stop_index,
+                    route.stops().get(stop_index).id()
+                );
+            }
+
+            // save all changes
+            connection.commit();
+        }
+        
+        // erase all changes if something went wrong
+        catch (SQLException | RuntimeException exception)
+        {
+            connection.rollback();
+            throw exception;
+        }
+
+        // restore that we have save commit mode before using method
+        finally
+        {
+            connection.setAutoCommit(auto_commit);
+        }
+    }
+
     // add stops from DB to program
     public static List<Stop> find_route_stops(Connection connection, String route_id) throws SQLException
     {
