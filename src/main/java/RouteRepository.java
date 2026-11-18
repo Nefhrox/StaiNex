@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class RouteRepository
 {
@@ -126,6 +127,46 @@ public class RouteRepository
         finally
         {
             connection.setAutoCommit(auto_commit);
+        }
+    }
+
+    // load full route with all stops from DB
+    public static Optional<Route> find_route(Connection connection, String route_id) throws SQLException
+    {
+        // validate route ID argument
+        if (route_id == null || route_id.isBlank())
+        {
+            throw new IllegalArgumentException("Route ID must not be blank");
+        }
+
+        // prepare SQL command
+        String sql = "SELECT name FROM routes WHERE id = ?";
+
+        // find route name by ID
+        try (PreparedStatement statement = connection.prepareStatement(sql))
+        {
+            statement.setString(1, route_id);
+
+            try (ResultSet result_set = statement.executeQuery())
+            {
+                // if route wasnt found return empty object
+                if (!result_set.next())
+                {
+                    return Optional.empty();
+                }
+
+                // read route name
+                String name = result_set.getString("name");
+                List<Stop> stops = find_route_stops(connection, route_id);
+
+                // if route exists but we have no data about stops then data is broken
+                if (stops.isEmpty())
+                {
+                    throw new IllegalStateException("Route " + route_id + " has no stops");
+                }
+
+                return Optional.of(new Route(route_id, name, stops));
+            }
         }
     }
 
