@@ -27,7 +27,7 @@ public class RouteSaveCheck
                 // save test route
                 RouteRepository.save_route(connection, route);
 
-                // load route in DB
+                // load route from DB
                 Optional<Route> loaded_route = RouteRepository.find_route(connection, route.id());
 
                 // throw exception if test route is empty or has wrong data
